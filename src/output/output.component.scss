@@ -1,0 +1,19 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.output{
+  flex: 1;
+  overflow: auto;
+  user-select: all;
+  padding: .5em;
+}
+
+:host ::ng-deep {
+  p {
+    margin: 0 0 .25em;
+    padding: 0;
+  }
+}

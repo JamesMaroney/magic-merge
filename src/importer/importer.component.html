@@ -1,0 +1,10 @@
+<header>
+    <h1>Source Data</h1>
+    <menu>
+        <input type="file" (change)="onChooseFile($event)" />
+    </menu>
+</header>
+<div *ngIf="(preview$ | async) as preview"
+     class="preview" 
+     [innerHtml]="preview"
+></div>

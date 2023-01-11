@@ -1,0 +1,11 @@
+<header>
+    <h1>Output</h1>
+    <menu>
+        <!--
+        <button (click)="onCopy()">copy</button>
+        -->
+    </menu>
+</header>
+<div *ngIf="(output$ | async) as output"
+     class="output"
+     [innerHTML]="output"></div>

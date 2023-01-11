@@ -1,0 +1,17 @@
+<editor
+    #editor
+    [formControl]="formCtrl"
+    apiKey="v99jpi2gn1cpkj1kzpqpkxu3kcdi3hsjc15vrvpw19yd076h"
+    [init]="{
+        setup: setup,
+        menubar: false,
+        inline_styles : true,
+        placeholder: 'Enter template here',
+        toolbar: 'undo redo | bold italic underline removeformat | field cond',
+        formats: {
+            bold: { inline: 'span', styles: { fontWeight: 'bold' } },
+            underline: { inline: 'span', styles: { textDecoration: 'underline' } },
+            italic: { inline: 'span', styles: { fontStyle: 'italic' } }
+        }
+    }"
+></editor>

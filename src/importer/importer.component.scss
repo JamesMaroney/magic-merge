@@ -1,0 +1,42 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.preview {
+  flex: 1;
+  overflow: auto;
+}
+
+:host ::ng-deep {
+  table {
+    min-width: 100%;
+    border-collapse: collapse;
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 2px 4px;
+    }
+
+    tr:first-child td {
+      font-weight: bold;
+      background: #fff;
+      position: sticky;
+      top: 0;
+      border-top: 0;
+    }
+
+    td:first-child {
+      border-left: 0;
+    }
+
+    td:last-child {
+      border-right: 0;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+  }
+}
