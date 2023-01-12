@@ -1,11 +1,8 @@
 import { Component } from '@angular/core';
 import { filter, map } from 'rxjs';
 import { AppService } from 'src/app/app.service';
+import { isNotNull } from 'src/utils';
 import { read, utils } from 'xlsx';
-
-function isNotNull<T>(o: T|null): o is T {
-  return o !== null;
-}
 
 @Component({
   selector: 'importer',

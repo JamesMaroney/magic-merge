@@ -14,6 +14,12 @@ fns['='] = fns['=='] = fns['EQ'];
 fns['!='] = fns['NEQ'];
 
 function formatRow(template: string, context: Record<string, unknown>){
+  // escaped newlines and whitespace
+  template = template.replace( /&laquo;((\s*(&nbsp;)*\s*)*<br>(\s*(&nbsp;)*\s*)*)*&raquo;/gm, '');
+  template = template.replace( /&laquo;(\s*(&nbsp;)*\s*)*/g, '&laquo;');
+  template = template.replace( /(\s*(&nbsp;)*\s*)*&raquo;/g, '&raquo;');
+
+  // conditionals
   template = template.replace(
     /&laquo;If\((.*?) ?(=|==|EQ|!=|NEQ) ?(.*?)\)&raquo;(.*?)&laquo;End\(If\)&raquo;/g, 
     (_, field, fn, val, content) => {
@@ -21,9 +27,21 @@ function formatRow(template: string, context: Record<string, unknown>){
       return fns[fn]( context[field], val) ? content : '';
     }
   );
-  return template.replace(/&laquo;(.*?)&raquo;/g, (_, name: string) => {
-    return name in context ? `${context[name]}` : `«${name}»`;
+  
+  // field references
+  template = template.replace(/&laquo;(.*?)&raquo;/g, (match, name: string) => {
+    return name in context ? `${context[name]}` : match;
   })
+
+  // trim
+  template = template.replace(
+    /&laquo;Trim\((.*?)\)&raquo;(.*?)&laquo;End\(Trim\)&raquo;/g, 
+    (_, chars, content) => {
+      return content.replace(new RegExp(`(${chars})+$`, 'g'), '');
+    }
+  );
+  
+  return template
 }
 
 @Component({
@@ -42,7 +60,7 @@ export class OutputComponent {
     this.appSvc.worksheet,
     this.appSvc.template
   ]).pipe(
-    filter( ([ws, template]) => !!ws && !!template),
+    filter( ([ws, _]) => ws != undefined),
     map( ([ws, template]) => {
       if(ws === null || ws['!data'] === undefined || template === null) return;
       const cols = ws['!data'][0].map(c => c.v);

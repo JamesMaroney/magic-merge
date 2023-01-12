@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { lastValueFrom, map, Subscription, take, tap } from 'rxjs';
 import { AppService } from 'src/app/app.service';
 import { Editor } from 'tinymce';
 
@@ -16,7 +16,7 @@ export class TemplateComponent implements OnInit, OnDestroy {
 
   constructor( public appSvc: AppService ){}
 
-  setup(editor: Editor) {
+  setup = (editor: Editor) => {
     editor.ui.registry.addButton('field', {
       text: '«Field»',
       onAction: function () {
@@ -25,7 +25,7 @@ export class TemplateComponent implements OnInit, OnDestroy {
       }
     });
     editor.ui.registry.addMenuButton('cond', {
-      text: '«If»',
+      text: '«If()»',
       fetch: function (callback) {
         callback([
           {
@@ -45,6 +45,51 @@ export class TemplateComponent implements OnInit, OnDestroy {
             }
           }
         ]);
+      }
+    });
+    editor.ui.registry.addButton('trim', {
+      text: '«Trim()»',
+      tooltip: 'trim characters from the end of the contained content',
+      onAction: function () {
+        const content = editor.selection.getContent() || 'Content';
+        editor.insertContent(`«Trim(Chars)»${content}«End(Trim)»`);
+      }
+    });
+    editor.ui.registry.addButton('space', {
+      text: '« »',
+      tooltip: 'formatting space',
+      onAction: function () {
+        editor.insertContent(`«<br>»`);
+      }
+    });
+
+    editor.ui.registry.addAutocompleter('codepoints', {
+      ch: '<',
+      minChars: 0,
+      columns: 1,
+      onAction: function (autocompleteApi, rng, value) {
+        editor.selection.setRng(rng);
+        editor.insertContent(value);
+        autocompleteApi.hide();
+      },
+      fetch: (pattern) => {
+        pattern = pattern.toLocaleLowerCase();
+        return new Promise( resolve => {
+          this.appSvc.columns$.pipe(
+            take(1),
+            map( cols => [
+                  { text: '« »', value: `«<br>»` },
+                  { text: '«If()»', value: `«If(Field = 'Value')»Content«End(If)»` },
+                  { text: '«Trim()»', value: `«Trim(Chars)»Content«End(Trim)»` },
+                  ...((cols || []).map( col => ({
+                    value: `«${col}»`,
+                    text: `«${col}»`,
+                  })))
+                ].filter( col => col.text.toLocaleLowerCase().includes(pattern))
+            ),
+            tap(config => resolve(config || []) ),
+          ).subscribe();
+        })
       }
     });
   }

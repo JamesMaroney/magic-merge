@@ -17,9 +17,8 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "docs",
-            "baseHref" : "/magic-merge/",
             "index": "src/index.html",
+            "outputPath": "dist",
             "main": "src/main.ts",
             "polyfills": [
               "zone.js"
@@ -49,7 +48,9 @@
                   "maximumError": "4kb"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "outputPath": "docs",
+              "baseHref" : "/magic-merge/"
             },
             "development": {
               "buildOptimizer": false,
