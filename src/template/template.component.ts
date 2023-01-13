@@ -5,11 +5,10 @@ import { AppService } from 'src/app/app.service';
 import { Editor } from 'tinymce';
 
 const injectionText = {
-  cond_eq: (content = 'Content') => `<mark>«If(Field = 'Value')»</mark>${content}<mark>«End(If)</mark><mark contenteditable="false">»</mark> `,
-  cond_neq: (content = 'Content') => `<mark>«If(Field != 'Value')»</mark>${content}<mark>«End(If)</mark><mark contenteditable="false">»</mark> `,
-  trim: (content = 'Content') => `<mark>«Trim(Chars)»</mark>${content}<mark>«End(Trim)</mark><mark contenteditable="false">»</mark> `,
-  space: () => `<mark>«</mark><br><mark contenteditable="false">»</mark> `,
-  field: (field = 'Field') => `<mark>«</mark>${field}<mark contenteditable="false">»</mark> ` 
+  cond: (matcher: string, content = 'Content') => `<mark contenteditable="false">«</mark><mark>If(Field ${matcher} 'Value')</mark><mark contenteditable="false">»</mark>${content}<mark contenteditable="false">«</mark><mark>End(If)</mark><mark contenteditable="false">»</mark>`,
+  trim: (content = 'Content') => `<mark contenteditable="false">«</mark><mark>Trim(Chars)</mark><mark contenteditable="false">»</mark>${content}<mark contenteditable="false">«</mark><mark>End(Trim)</mark><mark contenteditable="false">»</mark>`,
+  space: () => `<mark contenteditable="false">«</mark><br><mark contenteditable="false">»</mark>`,
+  field: (field = 'Field') => `<mark contenteditable="false">«</mark>${field}<mark contenteditable="false">»</mark>` 
 }
 
 @Component({
@@ -41,7 +40,7 @@ export class TemplateComponent implements OnInit, OnDestroy {
             text: 'Equals',
             onAction: function (_) {
               const content = editor.selection.getContent() || undefined;
-              editor.insertContent( injectionText.cond_eq(content) );
+              editor.insertContent( injectionText.cond('=', content) );
             }
           },
           {
@@ -49,7 +48,7 @@ export class TemplateComponent implements OnInit, OnDestroy {
             text: 'Not Equal',
             onAction: function (_) {
               const content = editor.selection.getContent() || undefined;
-              editor.insertContent( injectionText.cond_neq(content) );
+              editor.insertContent( injectionText.cond('!=', content) );
             }
           }
         ]);
@@ -87,7 +86,7 @@ export class TemplateComponent implements OnInit, OnDestroy {
             take(1),
             map( cols => [
                   { text: '« »', value: injectionText.space() },
-                  { text: '«If()»', value: injectionText.cond_eq() },
+                  { text: '«If()»', value: injectionText.cond('=') },
                   { text: '«Trim()»', value: injectionText.trim() },
                   ...((cols || []).map( col => ({ text: `«${col}»`, value: injectionText.field(col) })))
                 ].filter( col => col.text.toLocaleLowerCase().includes(pattern))
