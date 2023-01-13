@@ -14,6 +14,8 @@ fns['='] = fns['=='] = fns['EQ'];
 fns['!='] = fns['NEQ'];
 
 function formatRow(template: string, context: Record<string, unknown>){
+  template = template.replace( /<\/?mark( contenteditable="false")?>/g, '');
+
   // escaped newlines and whitespace
   template = template.replace( /&laquo;((\s*(&nbsp;)*\s*)*<br>(\s*(&nbsp;)*\s*)*)*&raquo;/gm, '');
   template = template.replace( /&laquo;(\s*(&nbsp;)*\s*)*/g, '&laquo;');

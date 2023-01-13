@@ -1,8 +1,16 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { lastValueFrom, map, Subscription, take, tap } from 'rxjs';
+import { map, Subscription, take, tap } from 'rxjs';
 import { AppService } from 'src/app/app.service';
 import { Editor } from 'tinymce';
+
+const injectionText = {
+  cond_eq: (content = 'Content') => `<mark>«If(Field = 'Value')»</mark>${content}<mark>«End(If)</mark><mark contenteditable="false">»</mark> `,
+  cond_neq: (content = 'Content') => `<mark>«If(Field != 'Value')»</mark>${content}<mark>«End(If)</mark><mark contenteditable="false">»</mark> `,
+  trim: (content = 'Content') => `<mark>«Trim(Chars)»</mark>${content}<mark>«End(Trim)</mark><mark contenteditable="false">»</mark> `,
+  space: () => `<mark>«</mark><br><mark contenteditable="false">»</mark> `,
+  field: (field = 'Field') => `<mark>«</mark>${field}<mark contenteditable="false">»</mark> ` 
+}
 
 @Component({
   selector: 'template-editor',
@@ -19,29 +27,29 @@ export class TemplateComponent implements OnInit, OnDestroy {
   setup = (editor: Editor) => {
     editor.ui.registry.addButton('field', {
       text: '«Field»',
-      onAction: function () {
-        const field = editor.selection.getContent() || 'Field';
-        editor.insertContent(`«${field}»`);
-      }
-    });
+      onAction: () => {
+        const field = editor.selection.getContent() || undefined;
+        editor.insertContent( injectionText.field(field) );
+      },
+    })
     editor.ui.registry.addMenuButton('cond', {
       text: '«If()»',
-      fetch: function (callback) {
+      fetch: (callback) => {
         callback([
           {
             type: 'menuitem',
             text: 'Equals',
             onAction: function (_) {
-              const content = editor.selection.getContent() || 'Content';
-              editor.insertContent(`«If(Field = \'Value\')»${content}«End(If)»`);
+              const content = editor.selection.getContent() || undefined;
+              editor.insertContent( injectionText.cond_eq(content) );
             }
           },
           {
             type: 'menuitem',
             text: 'Not Equal',
             onAction: function (_) {
-              const content = editor.selection.getContent() || 'Content';
-              editor.insertContent(`«If(Field != \'Value\')»${content}«End(If)»`);
+              const content = editor.selection.getContent() || undefined;
+              editor.insertContent( injectionText.cond_neq(content) );
             }
           }
         ]);
@@ -51,15 +59,15 @@ export class TemplateComponent implements OnInit, OnDestroy {
       text: '«Trim()»',
       tooltip: 'trim characters from the end of the contained content',
       onAction: function () {
-        const content = editor.selection.getContent() || 'Content';
-        editor.insertContent(`«Trim(Chars)»${content}«End(Trim)»`);
+        const content = editor.selection.getContent() || undefined;
+        editor.insertContent( injectionText.trim(content) );
       }
     });
     editor.ui.registry.addButton('space', {
       text: '« »',
       tooltip: 'formatting space',
       onAction: function () {
-        editor.insertContent(`«<br>»`);
+        editor.insertContent( injectionText.space() );
       }
     });
 
@@ -78,13 +86,10 @@ export class TemplateComponent implements OnInit, OnDestroy {
           this.appSvc.columns$.pipe(
             take(1),
             map( cols => [
-                  { text: '« »', value: `«<br>»` },
-                  { text: '«If()»', value: `«If(Field = 'Value')»Content«End(If)»` },
-                  { text: '«Trim()»', value: `«Trim(Chars)»Content«End(Trim)»` },
-                  ...((cols || []).map( col => ({
-                    value: `«${col}»`,
-                    text: `«${col}»`,
-                  })))
+                  { text: '« »', value: injectionText.space() },
+                  { text: '«If()»', value: injectionText.cond_eq() },
+                  { text: '«Trim()»', value: injectionText.trim() },
+                  ...((cols || []).map( col => ({ text: `«${col}»`, value: injectionText.field(col) })))
                 ].filter( col => col.text.toLocaleLowerCase().includes(pattern))
             ),
             tap(config => resolve(config || []) ),
