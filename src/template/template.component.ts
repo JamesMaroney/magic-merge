@@ -5,10 +5,10 @@ import { AppService } from 'src/app/app.service';
 import { Editor } from 'tinymce';
 
 const injectionText = {
-  cond: (matcher: string, content = 'Content') => `<mark contenteditable="false">«</mark><mark>If(Field ${matcher} 'Value')</mark><mark contenteditable="false">»</mark>${content}<mark contenteditable="false">«</mark><mark>End(If)</mark><mark contenteditable="false">»</mark>`,
-  trim: (content = 'Content') => `<mark contenteditable="false">«</mark><mark>Trim(Chars)</mark><mark contenteditable="false">»</mark>${content}<mark contenteditable="false">«</mark><mark>End(Trim)</mark><mark contenteditable="false">»</mark>`,
-  space: () => `<mark contenteditable="false">«</mark><br><mark contenteditable="false">»</mark>`,
-  field: (field = 'Field') => `<mark contenteditable="false">«</mark>${field}<mark contenteditable="false">»</mark>` 
+  cond: (matcher: string, content = 'Content') => `«If(Field ${matcher} 'Value')»${content}«End(If)»`,
+  trim: (content = 'Content') => `«Trim(Chars)»${content}«End(Trim)»`,
+  space: () => `«<br>»`,
+  field: (field = 'Field') => `«${field}»` 
 }
 
 @Component({
