@@ -1,11 +1,11 @@
 <header>
     <h1>Output</h1>
     <menu>
-        <!--
-        <button (click)="onCopy()">copy</button>
-        -->
+        <span *ngIf="copied$ | async" class="copy-success">copied!</span>
+        <button *ngIf="output$ | async" (click)="onCopy()">copy to clipboard</button>
     </menu>
 </header>
 <div *ngIf="(output$ | async) as output"
-     class="output"
+     #outputContainer
+     class="outputContainer"
      [innerHTML]="output"></div>

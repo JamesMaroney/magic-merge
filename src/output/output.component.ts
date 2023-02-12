@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
-import { combineLatest, filter, map, take, tap } from 'rxjs';
+import { BehaviorSubject, combineLatest, filter, map, take, tap } from 'rxjs';
 import { AppService } from 'src/app/app.service';
 
 // conditional functions
@@ -14,23 +14,27 @@ fns['='] = fns['=='] = fns['EQ'];
 fns['!='] = fns['NEQ'];
 
 function formatRow(template: string, context: Record<string, unknown>){
-  template = template.replace( /<\/?mark( contenteditable="false")?>/g, '');
+  // replace html entities for left/right angle quotes for more readable regexes below
+  template = template.replace( /&laquo;/gm, '«');
+  template = template.replace( /&raquo;/gm, '»');
+
+  // template = template.replace( /<\/?mark( contenteditable="false")?>/g, '');
 
   // escaped newlines and whitespace
-  template = template.replace( /&laquo;((\s*(&nbsp;)*\s*)*<br>(\s*(&nbsp;)*\s*)*)*&raquo;/gm, '');
-  template = template.replace( /&laquo;(\s*(&nbsp;)*\s*)*/g, '&laquo;');
-  template = template.replace( /(\s*(&nbsp;)*\s*)*&raquo;/g, '&raquo;');
+  template = template.replace( /«(\s*(&nbsp;)*\s*)*/g, '«');
+  template = template.replace( /(\s*(&nbsp;)*\s*)*»/g, '»');
+  template = template.replace( /«((\s*(&nbsp;)*\s*)*<br>(\s*(&nbsp;)*\s*)*)*»/gm, '');
 
   // conditionals
   template = template.replace(
-    /&laquo;If\((?:'|"|&laquo;)?(.*?)(?:'|"|&raquo;)? ?(=|==|EQ|!=|NEQ) ?(.*?)\)&raquo;(.*?)(?:&laquo;Else&raquo;(.*?))?&laquo;End\(If\)&raquo;/g,
+    /«If\((?:'|"|«)?(.*?)(?:'|"|»)? ?(=|==|EQ|!=|NEQ) ?(.*?)\)»(.*?)(?:«Else»(.*?))?«End\(If\)»/g,
     (_, field, fn, val, content, altContent = '') => {
       val = val.slice(1, val.length - 1);
       return fns[fn]( context[field], val) ? content : altContent;
     }
   );
   template = template.replace(
-    /&laquo;If\((.*?) ?(=|==|EQ|!=|NEQ) ?(.*?)\)&raquo;(.*?)&laquo;End\(If\)&raquo;/g, 
+    /«If\((.*?) ?(=|==|EQ|!=|NEQ) ?(.*?)\)»(.*?)«End\(If\)»/g, 
     (_, field, fn, val, content) => {
       val = val.slice(1, val.length - 1);
       return fns[fn]( context[field], val) ? content : '';
@@ -38,13 +42,13 @@ function formatRow(template: string, context: Record<string, unknown>){
   );
   
   // field references
-  template = template.replace(/&laquo;(.*?)&raquo;/g, (match, name: string) => {
+  template = template.replace(/«(.*?)»/g, (match, name: string) => {
     return name in context ? `${context[name]}` : match;
   })
 
   // trim
   template = template.replace(
-    /&laquo;Trim\((.*?)\)&raquo;(.*?)&laquo;End\(Trim\)&raquo;/g, 
+    /«Trim\((.*?)\)»(.*?)«End\(Trim\)»/g, 
     (_, chars, content) => {
       return content.replace(new RegExp(`(${chars})+$`, 'g'), '');
     }
@@ -65,6 +69,11 @@ export class OutputComponent {
     public domSanitizer: DomSanitizer
   ){}
 
+  @ViewChild('outputContainer')
+  outputContainer!: ElementRef<Element>;
+
+  copied$ = new BehaviorSubject(false);
+
   output$ = combineLatest([
     this.appSvc.worksheet,
     this.appSvc.template
@@ -83,11 +92,13 @@ export class OutputComponent {
   )
 
   onCopy(){
-    this.output$.pipe(
-      take(1),
-      tap( html => navigator.clipboard.writeText(''+html) )
-    )
-    
+    window.getSelection()?.selectAllChildren(
+      this.outputContainer.nativeElement
+    );
+    document.execCommand("copy");
+    window.getSelection()?.empty();
+    this.copied$.next(true);
+    window.setTimeout(() => this.copied$.next(false), 3000);
   }
 
 }
