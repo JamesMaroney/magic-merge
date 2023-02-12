@@ -19,9 +19,9 @@ const injectionText = {
 export class TemplateComponent implements OnInit, OnDestroy {
 
   formCtrl = new FormControl("");
-  subscription: Subscription | null = null;
+  subscriptions: Subscription[] = [];
 
-  constructor( public appSvc: AppService ){}
+  constructor( public appSvc: AppService ){ }
 
   setup = (editor: Editor) => {
     this.appSvc.columns$.subscribe( cols => {
@@ -204,10 +204,18 @@ export class TemplateComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(){
-    this.subscription = this.formCtrl.valueChanges.subscribe( val => this.appSvc.setTemplate(val || ''))
+    this.subscriptions.push(
+      this.formCtrl.valueChanges.subscribe( val  => {
+        val = val || '';
+        this.appSvc.setTemplate(val);
+        window.localStorage.setItem('autosave', val)
+      })
+    );
+    const restoreVal = window.localStorage.getItem('autosave')
+    if(restoreVal) this.formCtrl.setValue(restoreVal);
   }
 
   ngOnDestroy() {
-    this.subscription?.unsubscribe();
+    this.subscriptions.forEach(s => s.unsubscribe());
   }
 }
