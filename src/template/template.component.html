@@ -4,9 +4,10 @@
     apiKey="v99jpi2gn1cpkj1kzpqpkxu3kcdi3hsjc15vrvpw19yd076h"
     [init]="{
         setup: setup,
+        placeholder: 'Enter template here',
+
         menubar: false,
         inline_styles : true,
-        placeholder: 'Enter template here',
         toolbar: 'undo redo | bold italic underline removeformat | field cond trim space',
         contextmenu: 'functions fields',
         formats: {
@@ -14,6 +15,10 @@
             underline: { inline: 'span', styles: { textDecoration: 'underline' } },
             italic: { inline: 'span', styles: { fontStyle: 'italic' } }
         },
-        content_style: 'mark { background: #fff; color: #666; }'
+
+        plugins: 'autosave',
+        autosave_prefix: 'tinymce-autosave-',
+        autosave_restore_when_empty: true,
+        autosave_retention: '525600m'
     }"
 ></editor>
