@@ -144,6 +144,11 @@ export class TemplateComponent implements OnInit, OnDestroy {
       }
     })
 
+    setTimeout(
+     () => this.formCtrl.setValue(editor.getContent()),
+     1200
+    )
+
     // editor.on('keydown', (event) => {
     //   // if (event.key !== 'Enter') return;
     //   // if (event.metaKey || event.shiftKey || event.altKey || event.ctrlKey)
