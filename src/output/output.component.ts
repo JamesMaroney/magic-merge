@@ -23,6 +23,13 @@ function formatRow(template: string, context: Record<string, unknown>){
 
   // conditionals
   template = template.replace(
+    /&laquo;If\((.*?) ?(=|==|EQ|!=|NEQ) ?(.*?)\)&raquo;(.*?)(?:&laquo;Else&raquo;(.*?))?&laquo;End\(If\)&raquo;/g, 
+    (_, field, fn, val, content, altContent = '') => {
+      val = val.slice(1, val.length - 1);
+      return fns[fn]( context[field], val) ? content : altContent;
+    }
+  );
+  template = template.replace(
     /&laquo;If\((.*?) ?(=|==|EQ|!=|NEQ) ?(.*?)\)&raquo;(.*?)&laquo;End\(If\)&raquo;/g, 
     (_, field, fn, val, content) => {
       val = val.slice(1, val.length - 1);
