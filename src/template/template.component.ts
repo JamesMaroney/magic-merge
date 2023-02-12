@@ -24,13 +24,37 @@ export class TemplateComponent implements OnInit, OnDestroy {
   constructor( public appSvc: AppService ){}
 
   setup = (editor: Editor) => {
-    editor.ui.registry.addButton('field', {
-      text: '«Field»',
-      onAction: () => {
-        const field = editor.selection.getContent() || undefined;
-        editor.insertContent( injectionText.field(field) );
-      },
-    })
+    this.appSvc.columns$.subscribe( cols => {
+      editor.ui.registry.addMenuButton('field', {
+        text: '«Field»',
+        fetch: (callback) => { 
+          const cols = this.appSvc.columns$.getValue();
+          callback(
+            cols.length 
+              ? cols.map( col => ({
+                type: 'menuitem',
+                text: `«${col}»`,
+                onAction: function (_) {
+                  editor.insertContent( injectionText.field(col) );
+                }
+              })) 
+              : [{
+                type: 'menuitem',
+                text: '«Field»',
+                onAction: function (_) {
+                  const content = editor.selection.getContent() || undefined;
+                  editor.insertContent( injectionText.field(content) );
+                }
+              }
+            ]
+          )
+        },
+        // onAction: () => {
+        //   const field = editor.selection.getContent() || undefined;
+        //   editor.insertContent( injectionText.field(field) );
+        // },
+      })
+    });
     editor.ui.registry.addMenuButton('cond', {
       text: '«If()»',
       fetch: (callback) => {
@@ -72,6 +96,7 @@ export class TemplateComponent implements OnInit, OnDestroy {
 
     editor.ui.registry.addAutocompleter('codepoints', {
       ch: '<',
+      matches: () => true,
       minChars: 0,
       columns: 1,
       onAction: function (autocompleteApi, rng, value) {
@@ -80,6 +105,7 @@ export class TemplateComponent implements OnInit, OnDestroy {
         autocompleteApi.hide();
       },
       fetch: (pattern) => {
+        console.log('>>>> autocomplete.fetch() ', pattern)
         pattern = pattern.toLocaleLowerCase();
         return new Promise( resolve => {
           this.appSvc.columns$.pipe(
@@ -96,6 +122,28 @@ export class TemplateComponent implements OnInit, OnDestroy {
         })
       }
     });
+
+    editor.ui.registry.addContextMenu('functions', {
+      update: (selection) => { // TODO: handle selection
+        return [ 
+          { type: 'item', text: '« »',  onAction: () => editor.insertContent( injectionText.space() )},
+          { type: 'submenu', text: '«If()»', getSubmenuItems: () => [
+            { type: 'item', text: 'Equals',  onAction: () => editor.insertContent( injectionText.cond('=')) },
+            { type: 'item', text: 'Not Equal',  onAction: () => editor.insertContent( injectionText.cond('!=')) },
+          ]},
+          { type: 'item', text: '«Trim()»',  onAction: () => editor.insertContent( injectionText.trim()) },
+        ]
+      }
+    })
+    editor.ui.registry.addContextMenu('fields', {
+      update: (selection) => { // TODO: handle selection
+        return  this.appSvc.columns$.getValue().map( col => ({
+            type: 'item',
+            text: `«${col}»`,
+            onAction: () => editor.insertContent( injectionText.field(col) )
+          }as const ))
+      }
+    })
 
     // editor.on('keydown', (event) => {
     //   // if (event.key !== 'Enter') return;
