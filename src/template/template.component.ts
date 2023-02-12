@@ -105,7 +105,6 @@ export class TemplateComponent implements OnInit, OnDestroy {
         autocompleteApi.hide();
       },
       fetch: (pattern) => {
-        console.log('>>>> autocomplete.fetch() ', pattern)
         pattern = pattern.toLocaleLowerCase();
         return new Promise( resolve => {
           this.appSvc.columns$.pipe(
