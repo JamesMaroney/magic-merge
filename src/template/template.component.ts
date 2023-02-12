@@ -144,10 +144,8 @@ export class TemplateComponent implements OnInit, OnDestroy {
       }
     })
 
-    setTimeout(
-     () => this.formCtrl.setValue(editor.getContent()),
-     1200
-    )
+    // update the formControl when restoring draft from LocalStorage
+    editor.on('restoreDraft', () => this.formCtrl.setValue(editor.getContent()));
 
     // editor.on('keydown', (event) => {
     //   // if (event.key !== 'Enter') return;
