@@ -1,6 +1,14 @@
 # MagicMerge
 
-Really basic mail-merge with spreadsheets and rich text strings.
+Basic "mail-merge" type tool with spreadsheets and rich text strings.<br/>
+This tool allows you to use a simple Rich Text Editor to apply a formatted template to each row of a spreadsheet and capture the output to your clipboard.
+
+[Try it here](https://jamesmaroney.github.io/magic-merge/)
+
+Note: no personal data is sent from your browser. The spreadsheet is not uploaded to any server, it is kept in your browser, on your computer at all times.<br />
+Feel free to use this tool. If you find it useful, let me know by starring the repo.
+
+# Standard Readme for Devs
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 15.0.5.
 
