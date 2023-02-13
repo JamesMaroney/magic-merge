@@ -5,8 +5,10 @@
 
     & > div {
         overflow: auto;
-        flex: 1;
 
+        &:first-child {
+            flex: 1;
+        }
         &:last-child {
             flex: 2;
         }

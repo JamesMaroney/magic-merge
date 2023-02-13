@@ -18,8 +18,6 @@ function formatRow(template: string, context: Record<string, unknown>){
   template = template.replace( /&laquo;/gm, '«');
   template = template.replace( /&raquo;/gm, '»');
 
-  // template = template.replace( /<\/?mark( contenteditable="false")?>/g, '');
-
   // escaped newlines and whitespace
   template = template.replace( /«(\s*(&nbsp;)*\s*)*/g, '«');
   template = template.replace( /(\s*(&nbsp;)*\s*)*»/g, '»');
