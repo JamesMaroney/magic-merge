@@ -29,3 +29,26 @@ button, input {
 .tox-toolbar__primary {
     background: #3E4E5E;
 }
+
+a.view-on-github {
+  position: absolute;
+  bottom: 1em;
+  right: 1em;
+  font-family: Arial;
+  font-size: 14px;
+
+  &:link, &:visited, &:active {
+    display: inline-block;
+    background: #000;
+    color: #fff;
+    text-decoration: none;
+    padding: .25em .5em;
+    border: 1px solid #fff;
+    box-shadow: 0 0 10px rgba(0,0,0,0.8);
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  &:hover, &:focus {
+    text-decoration: underline;
+  }
+}
